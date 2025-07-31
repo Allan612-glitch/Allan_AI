@@ -6,10 +6,10 @@ import google.generativeai as genai
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-@bot.command(name = 'query')
+@bot.command(name='query')
 async def query(ctx, *, query):
     response = genai.generate_text(
         model="models/text-bison-001",
@@ -17,19 +17,23 @@ async def query(ctx, *, query):
         temperature=0.7,
         max_output_tokens=800,
     )
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    await ctx.send(response.result)
 
-@client.event
+@bot.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(bot))
+
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
-      return
+    if message.author == bot.user:
+        return
 
     if message.content.startswith('!hello'):
-      await message.channel.send('Hello!')
+        await message.channel.send('Hello!')
+    
+    await bot.process_commands(message)
 
 token = os.getenv('DISCORD_BOT_TOKEN')
 if token is None:
     raise ValueError("No DISCORD_BOT_TOKEN provided in environment variables")
-client.run(token)
+bot.run(token)
