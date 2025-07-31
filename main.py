@@ -11,13 +11,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.command(name='query')
 async def query(ctx, *, query):
-    response = genai.generate_text(
-        model="models/text-bison-001",
-        prompt=query,
-        temperature=0.7,
-        max_output_tokens=800,
-    )
-    await ctx.send(response.result)
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(query)
+        await ctx.send(response.text)
+    except Exception as e:
+        await ctx.send(f"Sorry, I encountered an error: {str(e)}")
 
 @bot.event
 async def on_ready():
