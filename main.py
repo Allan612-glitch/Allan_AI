@@ -14,7 +14,13 @@ async def query(ctx, *, query):
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(query)
-        await ctx.send(response.text)
+        
+        # Discord has a 2000 character limit for messages
+        response_text = response.text
+        if len(response_text) > 1900:
+            response_text = response_text[:1900] + "... (truncated)"
+        
+        await ctx.send(response_text)
     except Exception as e:
         await ctx.send(f"Sorry, I encountered an error: {str(e)}")
 
