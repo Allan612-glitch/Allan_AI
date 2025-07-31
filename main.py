@@ -18,7 +18,14 @@ async def query(ctx, *, query):
         # Discord has a 2000 character limit for messages
         response_text = response.text
         if len(response_text) > 1900:
-            response_text = response_text[:1900] + "... (truncated)"
+            # Use Gemini to summarize the long response
+            summary_prompt = f"Please summarize the following text to fit within 1800 characters while keeping the key information:\n\n{response_text}"
+            summary_response = model.generate_content(summary_prompt)
+            response_text = summary_response.text
+            
+            # If it's still too long after summarization, truncate as fallback
+            if len(response_text) > 1900:
+                response_text = response_text[:1900] + "... (truncated)"
         
         await ctx.send(response_text)
     except Exception as e:
